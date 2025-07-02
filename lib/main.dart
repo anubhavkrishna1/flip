@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/io.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf/shelf.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
@@ -51,7 +52,7 @@ class _ClipboardSyncAppState extends State<ClipboardSyncApp> {
   int _connectedClientsCount = 0;
 
   WebSocketChannel? _channel;
-  List<WebSocket> _connectedClients = [];
+  List<WebSocketChannel> _connectedClients = [];
 
   @override
   void initState() {
@@ -83,61 +84,81 @@ class _ClipboardSyncAppState extends State<ClipboardSyncApp> {
   }
 
   Future<void> _startWebSocketServer() async {
-    final handler = webSocketHandler((WebSocket socket) {
-      _connectedClients.add(socket);
-      setState(() {
-        _connectedClientsCount = _connectedClients.length;
-      });
+    try {
+      // Close existing server if any
+      await _server?.close();
       
-      socket.listen(
-        (message) {
-          debugPrint('Host received message: $message');
-          // Update host's display with received message
+      final handler = webSocketHandler((webSocketChannel) {
+        debugPrint('New client connected');
+        _connectedClients.add(webSocketChannel);
+        if (mounted) {
           setState(() {
-            _clipboardText = message;
+            _connectedClientsCount = _connectedClients.length;
           });
-          
-          // Show notification to host
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Message received from client'),
-                backgroundColor: Colors.blue,
-                duration: Duration(seconds: 2),
-              ),
-            );
-          }
-          
-          // Forward message to all other clients (except sender)
-          for (var client in _connectedClients) {
-            if (client != socket) {
-              client.add(message);
+        }
+        
+        webSocketChannel.stream.listen(
+          (message) {
+            debugPrint('Host received message from client: $message');
+            // Update host's display with received message
+            if (mounted) {
+              setState(() {
+                _clipboardText = message.toString();
+              });
+              
+              // Show notification to host
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Message received from client'),
+                  backgroundColor: Colors.blue,
+                  duration: Duration(seconds: 2),
+                ),
+              );
             }
-          }
-        },
-        onDone: () {
-          _connectedClients.remove(socket);
-          setState(() {
-            _connectedClientsCount = _connectedClients.length;
-          });
-        },
-        onError: (error) {
-          debugPrint('WebSocket client error: $error');
-          _connectedClients.remove(socket);
-          setState(() {
-            _connectedClientsCount = _connectedClients.length;
-          });
-        },
+            
+            // Forward message to all other clients (except sender)
+            for (var client in _connectedClients) {
+              if (client != webSocketChannel) {
+                try {
+                  client.sink.add(message.toString());
+                  debugPrint('Forwarded message to another client');
+                } catch (e) {
+                  debugPrint('Error forwarding message: $e');
+                }
+              }
+            }
+          },
+          onDone: () {
+            debugPrint('Client disconnected');
+            _connectedClients.remove(webSocketChannel);
+            if (mounted) {
+              setState(() {
+                _connectedClientsCount = _connectedClients.length;
+              });
+            }
+          },
+          onError: (error) {
+            debugPrint('WebSocket client error: $error');
+            _connectedClients.remove(webSocketChannel);
+            if (mounted) {
+              setState(() {
+                _connectedClientsCount = _connectedClients.length;
+              });
+            }
+          },
+        );
+      });
+
+      _server = await shelf_io.serve(
+        logRequests().addHandler(handler),
+        InternetAddress.anyIPv4,
+        5000,
       );
-    });
 
-    _server = await shelf_io.serve(
-      logRequests().addHandler(handler),
-      InternetAddress.anyIPv4,
-      5000,
-    );
-
-    debugPrint('WebSocket server running on ws://$_localIP:5000');
+      debugPrint('WebSocket server running on ws://$_localIP:5000');
+    } catch (e) {
+      debugPrint('Error starting WebSocket server: $e');
+    }
   }
 
   Future<void> _connectToWebSocket(String ip) async {
@@ -163,26 +184,24 @@ class _ClipboardSyncAppState extends State<ClipboardSyncApp> {
         throw Exception('Cannot reach host at $ip. Please check if the host is running and reachable.');
       }
       
-      _channel = WebSocketChannel.connect(
+      _channel = IOWebSocketChannel.connect(
         Uri.parse('ws://$ip'),
-        protocols: null,
       );
       
       await _channel!.ready;
       
       _channel!.stream.listen(
         (message) {
-          debugPrint('Received message: $message');
-          setState(() {
-            _clipboardText = message;
-            _isConnected = true;
-          });
-          // Don't automatically copy - just display the received text
+          debugPrint('Client received message from host: $message');
           if (mounted) {
+            setState(() {
+              _clipboardText = message.toString();
+            });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Message received from host'),
                 backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
               ),
             );
           }
@@ -240,34 +259,66 @@ class _ClipboardSyncAppState extends State<ClipboardSyncApp> {
 
   void _sendClipboard(String text) {
     if (isHost) {
+      // Send to all connected clients
+      int sentCount = 0;
       for (var client in _connectedClients) {
-        client.add(text);
+        try {
+          client.sink.add(text);
+          sentCount++;
+          debugPrint('Message sent to client');
+        } catch (e) {
+          debugPrint('Error sending to client: $e');
+        }
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Message sent to ${_connectedClients.length} client(s)'),
+            content: Text('Message sent to $sentCount client(s)'),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 1),
           ),
         );
       }
     } else {
-      _channel?.sink.add(text);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Message sent to host'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 1),
-          ),
-        );
+      // Send to host
+      if (_channel != null && _isConnected) {
+        try {
+          _channel!.sink.add(text);
+          debugPrint('Message sent to host: $text');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Message sent to host'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 1),
+              ),
+            );
+          }
+        } catch (e) {
+          debugPrint('Error sending to host: $e');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to send message'),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 1),
+              ),
+            );
+          }
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Not connected to host'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 1),
+            ),
+          );
+        }
       }
     }
-    // Update local display and clear input
-    setState(() {
-      _clipboardText = text;
-    });
+    // Clear input after sending - DON'T update _clipboardText here
     _textController.clear();
   }
 
@@ -275,6 +326,17 @@ class _ClipboardSyncAppState extends State<ClipboardSyncApp> {
   void dispose() {
     _textController.dispose();
     _clientIPController.dispose();
+    
+    // Close all client connections
+    for (var client in _connectedClients) {
+      try {
+        client.sink.close();
+      } catch (e) {
+        debugPrint('Error closing client connection: $e');
+      }
+    }
+    _connectedClients.clear();
+    
     _server?.close();
     _channel?.sink.close();
     super.dispose();
@@ -594,6 +656,29 @@ class _ClipboardSyncAppState extends State<ClipboardSyncApp> {
     }
   }
 
+  // Debug method to refresh UI and force state update
+  void _forceUIRefresh() {
+    if (mounted) {
+      setState(() {
+        // Force a state update
+      });
+    }
+  }
+
+  // Debug method to check connection status
+  void _checkConnectionStatus() {
+    debugPrint('=== CONNECTION STATUS ===');
+    debugPrint('Is Host: $isHost');
+    debugPrint('Connected Clients Count: $_connectedClientsCount');
+    debugPrint('Actual Clients List Length: ${_connectedClients.length}');
+    debugPrint('Client Connected: $_isConnected');
+    debugPrint('Local IP: $_localIP');
+    debugPrint('=========================');
+    
+    // Force UI refresh
+    _forceUIRefresh();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -601,6 +686,13 @@ class _ClipboardSyncAppState extends State<ClipboardSyncApp> {
         title: Text('Clipboard Sync'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          // Debug button - only show in debug mode
+          if (isHost)
+            IconButton(
+              icon: Icon(Icons.bug_report),
+              onPressed: _checkConnectionStatus,
+              tooltip: 'Debug Info',
+            ),
           IconButton(
             icon: Icon(Icons.settings),
             onPressed: () {
