@@ -1,2 +1,3 @@
 # flip
-A clipbaord using telegram bot.
+
+A clipbaord over local network.
