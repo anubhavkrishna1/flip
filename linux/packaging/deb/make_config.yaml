@@ -13,7 +13,7 @@ installed_size: 20000
 
 essential: false
 
-icon: web/icons/icon-192.png
+icon: web/icons/Icon-192.png
 
 description: |
   A clipboard manager over local network
