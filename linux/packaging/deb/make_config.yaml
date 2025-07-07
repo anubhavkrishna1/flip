@@ -1,0 +1,34 @@
+display_name: Flip
+package_name: flip
+
+maintainer:
+  name: "jakbin"
+  email: ""
+
+priority: optional
+
+section: x11
+
+installed_size: 20000
+
+essential: false
+
+icon: web/icons/icon-192.png
+
+description: |
+  A clipboard manager over local network
+
+postuninstall_scripts:
+  - echo "Sorry to see you go."
+
+keywords:
+  - clipboard
+  - manager
+
+generic_name: clipboard manager
+
+categories:
+  - Development
+  - Utility
+
+startup_notify: true
