@@ -9,6 +9,8 @@ lib/
 ├── main.dart                           # App entry point and theme configuration
 ├── models/
 │   └── connection_model.dart          # Data model for connection state
+├── controllers/
+│   └── theme_controller.dart          # Theme management and persistence
 ├── services/
 │   └── websocket_service.dart         # WebSocket server and client logic
 ├── pages/
@@ -33,14 +35,20 @@ lib/
   - Connection status
   - Clipboard text
 
-### 2. **Services** (`services/`)
+### 2. **Controllers** (`controllers/`)
+- **ThemeController**: Manages application theme:
+  - Light/Dark/System theme modes
+  - Persistent theme preference storage
+  - Theme change notifications
+
+### 3. **Services** (`services/`)
 - **WebSocketService**: Handles all WebSocket operations:
   - Server creation and management
   - Client connection logic
   - Message sending/receiving
   - Connection lifecycle management
 
-### 3. **Pages** (`pages/`)
+### 4. **Pages** (`pages/`)
 Main application pages:
 - **ClipboardSyncPage**: Main page that orchestrates all components:
   - State management
@@ -52,14 +60,14 @@ Main application pages:
   - Connection details
   - Usage instructions
 
-### 4. **Widgets** (`widgets/`)
+### 5. **Widgets** (`widgets/`)
 Reusable UI components with clear responsibilities:
 - **ConnectionStatusWidget**: Shows current connection status
 - **ClientConnectionWidget**: UI for connecting to a host
 - **ClipboardSyncWidget**: Text input and message display
 - **QRScannerWidget**: QR code scanning functionality
 
-### 5. **Utils** (`utils/`)
+### 6. **Utils** (`utils/`)
 - **NetworkUtils**: Pure utility functions for:
   - IP address validation
   - Local IP discovery
