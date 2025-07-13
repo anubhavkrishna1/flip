@@ -6,8 +6,12 @@ import '../widgets/client_connection_widget.dart';
 import '../widgets/clipboard_sync_widget.dart';
 import 'settings_page.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import '../controllers/theme_controller.dart';
 
 class ClipboardSyncPage extends StatefulWidget {
+  final ThemeController? themeController;
+
+  const ClipboardSyncPage({Key? key, this.themeController}) : super(key: key);
   @override
   _ClipboardSyncPageState createState() => _ClipboardSyncPageState();
 }
@@ -179,6 +183,7 @@ class _ClipboardSyncPageState extends State<ClipboardSyncPage> {
                               localIP: _connectionModel.localIP,
                               isHost: _connectionModel.isHost,
                               connectedClientsCount: _connectionModel.connectedClientsCount,
+                              themeController: widget.themeController,
                             ),
                           ),
                         );
@@ -220,6 +225,7 @@ class _ClipboardSyncPageState extends State<ClipboardSyncPage> {
                     localIP: _connectionModel.localIP,
                     isHost: _connectionModel.isHost,
                     connectedClientsCount: _connectionModel.connectedClientsCount,
+                    themeController: widget.themeController,
                   ),
                 ),
               );

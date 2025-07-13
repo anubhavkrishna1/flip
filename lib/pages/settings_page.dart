@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import '../controllers/theme_controller.dart';
 
 class SettingsPage extends StatelessWidget {
   final String localIP;
   final bool isHost;
   final int connectedClientsCount;
+  final ThemeController? themeController;
 
   const SettingsPage({
     Key? key,
     required this.localIP,
     required this.isHost,
     required this.connectedClientsCount,
+    this.themeController,
   }) : super(key: key);
 
   @override
@@ -99,6 +102,81 @@ class SettingsPage extends StatelessWidget {
             ),
             SizedBox(height: 16),
           ],
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.palette, size: 24),
+                      SizedBox(width: 8),
+                      Text(
+                        'Theme',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  if (themeController != null) ...[
+                    Row(
+                      children: [
+                        Text(
+                          'Appearance:',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Spacer(),
+                        DropdownButton<ThemeMode>(
+                          value: themeController!.themeMode,
+                          onChanged: (ThemeMode? newMode) {
+                            if (newMode != null) {
+                              themeController!.setThemeMode(newMode);
+                            }
+                          },
+                          items: ThemeMode.values.map((ThemeMode mode) {
+                            return DropdownMenuItem<ThemeMode>(
+                              value: mode,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    ThemeController.getThemeModeIcon(mode),
+                                    size: 20,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(ThemeController.getThemeModeString(mode)),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      'Choose your preferred theme. System will follow your device settings.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ] else ...[
+                    Text(
+                      'Theme controller not available',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 16),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
