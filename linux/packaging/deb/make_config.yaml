@@ -2,8 +2,8 @@ display_name: Flip
 package_name: flip
 
 maintainer:
-  name: "jakbin"
-  email: ""
+  name: "anubhavkrishna1"
+  email: "anubhavkrishna1@users.noreply.github.com"
 
 priority: optional
 
@@ -13,19 +13,22 @@ installed_size: 14410
 
 essential: false
 
-icon: assets/logo.png
+icon: assets/logo_256.png
 
 description: |
-  A clipboard manager over local network
+  A clipboard sync application that enables sharing clipboard content across devices on your local network using WebSockets.
 
 postuninstall_scripts:
   - echo "Sorry to see you go."
 
 keywords:
   - clipboard
-  - manager
+  - sync
+  - network
+  - websocket
+  - sharing
 
-generic_name: clipboard manager
+generic_name: Clipboard Sync
 
 categories:
   - Development
