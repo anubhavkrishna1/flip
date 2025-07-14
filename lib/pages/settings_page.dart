@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import '../controllers/theme_controller.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -35,42 +34,15 @@ class SettingsPage extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.qr_code, size: 24),
+                        Icon(Icons.info_outline, size: 24),
                         SizedBox(width: 8),
                         Text(
-                          'QR Code',
+                          'Server Information',
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Share this QR code with clients to connect:',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    SizedBox(height: 16),
-                    Center(
-                      child: Container(
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.3),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                            ),
-                          ],
-                        ),
-                        child: QrImageView(
-                          data: '$localIP:5000',
-                          version: QrVersions.auto,
-                          size: 200,
-                        ),
-                      ),
                     ),
                     SizedBox(height: 16),
                     Container(
@@ -90,9 +62,18 @@ class SettingsPage extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                          SizedBox(height: 8),
+                          SelectableText('IP Address: $localIP:5000'),
                           SizedBox(height: 4),
-                          SelectableText('IP: $localIP:5000'),
                           SelectableText('Connected Clients: $connectedClientsCount'),
+                          SizedBox(height: 8),
+                          Text(
+                            'Tip: Use the QR code button in the main screen to share connection info.',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.grey[600],
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
                         ],
                       ),
                     ),
