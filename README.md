@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="assets/logo_256.png" alt="Flip Logo" width="140" height="140">
+</div>
+
 # Flip - Clipboard over Local Network
 
 Flip is a cross-platform application that allows you to share your clipboard content across devices on your local network.
