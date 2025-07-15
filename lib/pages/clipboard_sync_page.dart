@@ -146,11 +146,9 @@ class _ClipboardSyncPageState extends State<ClipboardSyncPage> {
                   Container(
                     padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                      ),
+                      border: Border.all(color: Colors.grey.shade300),
                     ),
                     child: QrImageView(
                       data: '${_connectionModel.localIP}:5000',
