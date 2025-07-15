@@ -188,9 +188,9 @@ class SettingsPage extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 16),
-                  _buildHowToStep('1', 'Host Mode', 'Turn on Host mode to create a server. Share the QR code or IP address with clients.'),
-                  _buildHowToStep('2', 'Client Mode', 'Turn off Host mode and enter the host IP address or scan the QR code to connect.'),
-                  _buildHowToStep('3', 'Sync Clipboard', 'Type text and click "Send & Copy" to sync clipboard across all connected devices.'),
+                  _buildHowToStep('1', 'Host Mode', 'Turn on Host mode to create a server. Share the QR code or IP address with clients.', context),
+                  _buildHowToStep('2', 'Client Mode', 'Turn off Host mode and enter the host IP address or scan the QR code to connect.', context),
+                  _buildHowToStep('3', 'Sync Clipboard', 'Type text and click "Send & Copy" to sync clipboard across all connected devices.', context),
                 ],
               ),
             ),
@@ -200,7 +200,7 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHowToStep(String step, String title, String description) {
+  Widget _buildHowToStep(String step, String title, String description, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -369,10 +369,10 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 8),
-                _buildTechnicalItem('Framework', 'Flutter 3.32.5'),
-                _buildTechnicalItem('Protocol', 'WebSocket (ws://)'),
-                _buildTechnicalItem('Port', '5000'),
-                _buildTechnicalItem('Network', 'Local Area Network (LAN)'),
+                _buildTechnicalItem('Framework', 'Flutter 3.32.5', context),
+                _buildTechnicalItem('Protocol', 'WebSocket (ws://)', context),
+                _buildTechnicalItem('Port', '5000', context),
+                _buildTechnicalItem('Network', 'Local Area Network (LAN)', context),
                 SizedBox(height: 16),
                 
                 // License
@@ -441,7 +441,7 @@ Description: A clipboard sync application that enables sharing clipboard content
     );
   }
 
-  Widget _buildTechnicalItem(String label, String value) {
+  Widget _buildTechnicalItem(String label, String value, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
