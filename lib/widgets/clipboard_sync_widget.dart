@@ -65,43 +65,39 @@ class _ClipboardSyncWidgetState extends State<ClipboardSyncWidget> {
                           : Theme.of(context).colorScheme.outline.withOpacity(0.3),
                     ),
                   ),
-                  child: InkWell(
+                    child: InkWell(
                     borderRadius: BorderRadius.circular(16),
                     onTap: () {
                       setState(() {
-                        _autoCopyEnabled = !_autoCopyEnabled;
+                      _autoCopyEnabled = !_autoCopyEnabled;
                       });
                       widget.onShowSnackBar(
-                        _autoCopyEnabled 
-                            ? 'Auto-copy enabled' 
-                            : 'Auto-copy disabled',
-                        _autoCopyEnabled ? Colors.green : Colors.orange,
+                      _autoCopyEnabled 
+                        ? 'Auto-copy enabled' 
+                        : 'Auto-copy disabled',
+                      _autoCopyEnabled ? Colors.green : Colors.orange,
                       );
                     },
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _autoCopyEnabled ? Icons.auto_mode : Icons.pause,
-                            size: 16,
-                            color: _autoCopyEnabled 
-                                ? Theme.of(context).primaryColor 
-                                : Theme.of(context).colorScheme.onSurface,
-                          ),
-                          SizedBox(width: 6),
-                          Text(
-                            _autoCopyEnabled ? 'Auto-copy' : 'Manual',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: _autoCopyEnabled 
-                                  ? Theme.of(context).primaryColor 
-                                  : Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                        _autoCopyEnabled ? Icons.auto_mode : Icons.pause,
+                        size: 16,
+                        color: Colors.white,
+                        ),
+                        SizedBox(width: 6),
+                        Text(
+                        _autoCopyEnabled ? 'Auto-copy' : 'Manual',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                        ),
+                      ],
                       ),
                     ),
                   ),
